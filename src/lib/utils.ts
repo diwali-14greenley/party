@@ -1,6 +1,35 @@
 import type { Rsvp, RsvpStatus } from './types';
 
 export const APP_NAME = 'Party Pool';
+
+/** The party shown on the home page. Create it with supabase/diwali-2026.sql. */
+export const FEATURED_EVENT_SLUG = 'diwali-2026';
+
+export function dateParts(iso: string) {
+  const d = new Date(iso);
+  return {
+    weekday: d.toLocaleDateString(undefined, { weekday: 'long' }),
+    day: String(d.getDate()).padStart(2, '0'),
+    month: d.toLocaleDateString(undefined, { month: 'long' }),
+    year: d.getFullYear(),
+    time: d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }),
+  };
+}
+
+/** Google Calendar "add event" link (assumes a 4-hour party). */
+export function googleCalendarUrl(title: string, iso: string, location?: string | null, details?: string | null) {
+  const fmt = (d: Date) => d.toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
+  const start = new Date(iso);
+  const end = new Date(start.getTime() + 4 * 3600_000);
+  const p = new URLSearchParams({
+    action: 'TEMPLATE',
+    text: title,
+    dates: `${fmt(start)}/${fmt(end)}`,
+    location: location ?? '',
+    details: details ?? '',
+  });
+  return `https://calendar.google.com/calendar/render?${p.toString()}`;
+}
 export const AFTER_LOGIN_KEY = 'pp:after-login';
 
 export const STATUS_LABEL: Record<RsvpStatus, string> = {

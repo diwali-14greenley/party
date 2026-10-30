@@ -2,7 +2,7 @@ import { useEffect, type ReactNode } from 'react';
 import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
 import { useAuth } from './lib/auth';
 import { supabaseConfigured } from './lib/supabase';
-import { AFTER_LOGIN_KEY, APP_NAME } from './lib/utils';
+import { AFTER_LOGIN_KEY, APP_NAME, FEATURED_EVENT_SLUG } from './lib/utils';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import HostDashboard from './pages/HostDashboard';
@@ -49,7 +49,7 @@ export default function App() {
     <div className="app">
       <header className="topbar">
         <Link to="/" className="brand">
-          <span aria-hidden>🎈</span> {APP_NAME}
+          <span aria-hidden>🪔</span> {APP_NAME}
         </Link>
         <nav>
           {session ? (
@@ -61,7 +61,8 @@ export default function App() {
       </header>
 
       <Routes>
-        <Route path="/" element={<Home />} />
+        {/* Home shows the featured party; falls back to the landing page if it doesn't exist yet */}
+        <Route path="/" element={<EventPage slug={FEATURED_EVENT_SLUG} fallback={<Home />} />} />
         <Route path="/login" element={<Login />} />
         <Route path="/e/:slug" element={<EventPage />} />
         <Route path="/host" element={<RequireHost><HostDashboard /></RequireHost>} />

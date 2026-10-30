@@ -10,7 +10,7 @@ export interface EventFormValues {
   cover_emoji: string;
 }
 
-const EMOJIS = ['🎉', '🎂', '🥂', '🪩', '🍕', '🎃', '🎄', '🏖️', '🎮', '💍'];
+const EMOJIS = ['🪔', '🎉', '🎂', '🥂', '🪩', '🍕', '🎃', '🎄', '🏖️', '🎮', '💍'];
 
 interface Props {
   initial?: PartyEvent;

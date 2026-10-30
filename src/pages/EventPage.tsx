@@ -1,13 +1,22 @@
-import { useCallback, useEffect, useState, type FormEvent } from 'react';
+import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { useParams } from 'react-router-dom';
+import { Diya, Lantern, Mandala, StringLights } from '../components/Decorations';
 import { supabase } from '../lib/supabase';
 import type { MyRsvp, PartyEvent, PublicGuest, RsvpStatus } from '../lib/types';
-import { STATUS_EMOJI, STATUS_LABEL, errorMessage, formatEventDate, headcount } from '../lib/utils';
+import { STATUS_EMOJI, STATUS_LABEL, dateParts, errorMessage, googleCalendarUrl, headcount } from '../lib/utils';
 
 const tokenKey = (eventId: string) => `pp:rsvp:${eventId}`;
 
-export default function EventPage() {
-  const { slug = '' } = useParams();
+interface Props {
+  /** Show a specific event instead of the one in the URL (used by the home page). */
+  slug?: string;
+  /** What to render if that event doesn't exist. */
+  fallback?: ReactNode;
+}
+
+export default function EventPage({ slug: slugProp, fallback }: Props) {
+  const params = useParams();
+  const slug = slugProp ?? params.slug ?? '';
   const [event, setEvent] = useState<PartyEvent | null>(null);
   const [guests, setGuests] = useState<PublicGuest[]>([]);
   const [loading, setLoading] = useState(true);
@@ -88,6 +97,7 @@ export default function EventPage() {
   }
 
   if (loading) return <p className="center-note">Loading…</p>;
+  if (!event && fallback) return <>{fallback}</>;
   if (!event) {
     return (
       <main className="page narrow">
@@ -104,23 +114,67 @@ export default function EventPage() {
   const maybe = guests.filter((g) => g.status === 'maybe');
   const showForm = !submitted || editingExisting;
 
+  const when = dateParts(event.starts_at);
+  // "Diwali Party" → big "Diwali" + gold "Party" underneath
+  const titleMatch = event.title.match(/^(.*\S)\s+(party)$/i);
+  const titleMain = titleMatch ? titleMatch[1] : event.title;
+  const titleSub = titleMatch ? titleMatch[2] : null;
+  // Description: paragraphs split by blank lines; a short last paragraph (like "BYOB") becomes a glowing badge
+  const paragraphs = (event.description ?? '').split(/\n\s*\n/).map((p) => p.trim()).filter(Boolean);
+  const badge = paragraphs.length > 1 && paragraphs[paragraphs.length - 1].length <= 24 ? paragraphs.pop() : null;
+
   return (
     <main className="page event-page">
       <section className="invite">
-        <div className="invite-emoji">{event.cover_emoji ?? '🎉'}</div>
-        <h1>{event.title}</h1>
-        <div className="invite-meta">
-          <div>📅 {formatEventDate(event.starts_at)}</div>
-          {event.location && (
-            <div>
-              📍{' '}
-              <a href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`} target="_blank" rel="noreferrer">
-                {event.location}
-              </a>
-            </div>
-          )}
+        <StringLights />
+        <Lantern className="lantern-left" />
+        <Lantern className="lantern-right" />
+
+        <p className="invite-kicker">You are invited to</p>
+        <h1 className="invite-title">
+          <span className="invite-title-main">{titleMain}</span>
+          {titleSub && <span className="invite-title-sub">{titleSub}</span>}
+        </h1>
+
+        {paragraphs.map((p, i) => (
+          <p key={i} className="invite-desc">{p}</p>
+        ))}
+
+        <div className="date-block">
+          <div className="date-month">{when.month}</div>
+          <div className="date-row">
+            <span className="date-side">{when.weekday}</span>
+            <span className="date-day">{when.day}</span>
+            <span className="date-side">at {when.time}</span>
+          </div>
         </div>
-        {event.description && <p className="invite-desc">{event.description}</p>}
+
+        {event.location && (
+          <a
+            className="invite-address"
+            href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            {event.location}
+          </a>
+        )}
+
+        {badge && <div className="invite-badge">{badge}</div>}
+
+        <a
+          className="btn btn-ghost btn-sm calendar-btn"
+          href={googleCalendarUrl(event.title, event.starts_at, event.location, event.description)}
+          target="_blank"
+          rel="noreferrer"
+        >
+          Add to calendar
+        </a>
+
+        <div className="invite-floor">
+          <Mandala />
+          <Diya className="diya-main" />
+        </div>
       </section>
 
       <section className="card rsvp-card">
