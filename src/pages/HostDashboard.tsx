@@ -13,8 +13,16 @@ export default function HostDashboard() {
   const [loading, setLoading] = useState(true);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [allowed, setAllowed] = useState(true);
 
   const load = useCallback(async () => {
+    const { data: hostOk, error: hostErr } = await supabase.rpc('is_host');
+    // If add-hosts.sql hasn't been run yet, is_host doesn't exist: allow everyone like before.
+    if (!hostErr && hostOk === false) {
+      setAllowed(false);
+      setLoading(false);
+      return;
+    }
     const { data, error } = await supabase.from('events').select('*').order('starts_at', { ascending: true });
     if (error) setError(errorMessage(error));
     else setEvents(data as PartyEvent[]);
@@ -42,6 +50,21 @@ export default function HostDashboard() {
       return;
     }
     navigate(`/host/${(data as PartyEvent).id}`);
+  }
+
+  if (!allowed) {
+    return (
+      <main className="page narrow">
+        <div className="card empty">
+          <p className="big-emoji">🔒</p>
+          <h1>Hosts only</h1>
+          <p className="muted">
+            <strong>{session?.user.email}</strong> isn't on the host list. Ask the organizer to add you.
+          </p>
+          <button className="btn btn-ghost" onClick={() => supabase.auth.signOut()}>Sign out</button>
+        </div>
+      </main>
+    );
   }
 
   const now = Date.now();
