@@ -5,6 +5,13 @@ export const APP_NAME = 'Party Pool';
 /** The party shown on the home page. Create it with supabase/diwali-2026.sql. */
 export const FEATURED_EVENT_SLUG = 'diwali-2026';
 
+/** 1 → "st", 2 → "nd", 3 → "rd", 4 → "th", 11 → "th", 22 → "nd" … */
+export function ordinal(n: number): string {
+  const v = n % 100;
+  if (v >= 11 && v <= 13) return 'th';
+  return ({ 1: 'st', 2: 'nd', 3: 'rd' } as Record<number, string>)[n % 10] ?? 'th';
+}
+
 export function dateParts(iso: string) {
   const d = new Date(iso);
   return {

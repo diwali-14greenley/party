@@ -555,6 +555,14 @@ textarea { resize: vertical; }
   text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
 }
 
+.date-text .ordinal {
+  text-transform: lowercase;
+  font-size: 0.62em;
+  vertical-align: super;
+  line-height: 0;
+  margin-left: 0.05em;
+}
+
 .invite-address {
   display: flex;
   flex-direction: column;

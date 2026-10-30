@@ -4,7 +4,7 @@ import { CornerOrnament, Curl, DIYAS, Diya, Flourish, GoldDefs, SideOrnament } f
 import Sparkles from '../components/Sparkles';
 import { supabase } from '../lib/supabase';
 import type { MyRsvp, PartyEvent, PublicGuest, RsvpStatus } from '../lib/types';
-import { STATUS_EMOJI, STATUS_LABEL, dateParts, errorMessage, googleCalendarUrl, headcount } from '../lib/utils';
+import { STATUS_EMOJI, STATUS_LABEL, dateParts, ordinal, errorMessage, googleCalendarUrl, headcount } from '../lib/utils';
 
 const tokenKey = (eventId: string) => `pp:rsvp:${eventId}`;
 
@@ -178,7 +178,7 @@ export default function EventPage({ slug: slugProp, fallback }: Props) {
             <div className="date-row">
               <Curl />
               <div className="date-text">
-                <div>{when.month} {when.weekday} {Number(when.day)}</div>
+                <div>{when.month} {when.weekday} {Number(when.day)}<span className="ordinal">{ordinal(Number(when.day))}</span></div>
                 <div>at {when.time} ({when.year})</div>
               </div>
               <Curl flip />
