@@ -255,16 +255,6 @@ export default function EventPage({ slug: slugProp, fallback }: Props) {
                   <input type="email" required maxLength={200} value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email" />
                 </label>
               </div>
-              {status !== 'declined' && (
-                <label className="field">
-                  <span>Bringing anyone?</span>
-                  <select value={plusOnes} onChange={(e) => setPlusOnes(Number(e.target.value))}>
-                    {Array.from({ length: 6 }, (_, n) => (
-                      <option key={n} value={n}>{n === 0 ? 'Just me' : `+${n}`}</option>
-                    ))}
-                  </select>
-                </label>
-              )}
               <label className="field">
                 <span>Note for the host <em className="muted">(optional)</em></span>
                 <textarea rows={2} maxLength={500} value={note} onChange={(e) => setNote(e.target.value)} placeholder="Allergies, running late, can't wait…" />
