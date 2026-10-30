@@ -208,6 +208,13 @@ export default function EventPage({ slug: slugProp, fallback }: Props) {
             </div>
           )}
 
+          {event.hosted_by && (
+            <p className="invite-hosts reveal" style={{ ['--d' as string]: '2.45s' }}>
+              <span>Hosted by</span>
+              {event.hosted_by}
+            </p>
+          )}
+
           <div className="invite-actions reveal" style={{ ['--d' as string]: '2.6s' }}>
             <a href="#rsvp" className="btn btn-primary" onClick={scrollToRsvp}>RSVP</a>
             <a

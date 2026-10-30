@@ -86,6 +86,7 @@ export default function HostEvent() {
       ...values,
       location: values.location || null,
       description: values.description || null,
+      hosted_by: values.hosted_by || null,
     });
     setEditing(false);
   }

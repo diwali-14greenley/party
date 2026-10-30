@@ -584,6 +584,28 @@ textarea { resize: vertical; }
   text-shadow: 0 0 10px rgba(255, 220, 140, 0.95), 0 0 28px rgba(255, 160, 50, 0.7);
 }
 
+.invite-hosts {
+  margin: min(1.2rem, 1.8vh) 0 0;
+  font-family: var(--font-serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: clamp(1.05rem, 3.4vw, 1.3rem);
+  line-height: 1.35;
+  color: var(--gold-light);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.7);
+}
+.invite-hosts span {
+  display: block;
+  font-family: var(--font-body);
+  font-style: normal;
+  font-weight: 600;
+  font-size: 0.68rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-bottom: 0.2rem;
+}
+
 .invite-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 0.75rem; margin-top: min(1.6rem, 2.2vh); }
 .invite-actions .btn-ghost { background: rgba(30, 3, 7, 0.45); }
 

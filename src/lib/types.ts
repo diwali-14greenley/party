@@ -8,6 +8,7 @@ export interface PartyEvent {
   starts_at: string;
   location: string | null;
   cover_emoji: string | null;
+  hosted_by?: string | null;
   rsvp_open: boolean;
   show_guest_list: boolean;
   created_at?: string;

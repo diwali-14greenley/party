@@ -8,6 +8,7 @@ export interface EventFormValues {
   location: string;
   description: string;
   cover_emoji: string;
+  hosted_by: string;
 }
 
 const EMOJIS = ['🪔', '🎉', '🎂', '🥂', '🪩', '🍕', '🎃', '🎄', '🏖️', '🎮', '💍'];
@@ -25,6 +26,7 @@ export default function EventForm({ initial, submitLabel, onSubmit, onCancel }: 
   const [location, setLocation] = useState(initial?.location ?? '');
   const [description, setDescription] = useState(initial?.description ?? '');
   const [emoji, setEmoji] = useState(initial?.cover_emoji ?? '🎉');
+  const [hostedBy, setHostedBy] = useState(initial?.hosted_by ?? '');
   const [busy, setBusy] = useState(false);
 
   async function handleSubmit(e: FormEvent) {
@@ -37,6 +39,7 @@ export default function EventForm({ initial, submitLabel, onSubmit, onCancel }: 
         location: location.trim(),
         description: description.trim(),
         cover_emoji: emoji,
+        hosted_by: hostedBy.trim(),
       });
     } finally {
       setBusy(false);
@@ -76,6 +79,10 @@ export default function EventForm({ initial, submitLabel, onSubmit, onCancel }: 
           <input maxLength={200} value={location} onChange={(e) => setLocation(e.target.value)} placeholder="The rooftop, 12 Elm St" />
         </label>
       </div>
+      <label className="field">
+        <span>Hosted by</span>
+        <input maxLength={200} value={hostedBy} onChange={(e) => setHostedBy(e.target.value)} placeholder="Nirmit, Priya, Arjun & Sam" />
+      </label>
       <label className="field">
         <span>Details</span>
         <textarea

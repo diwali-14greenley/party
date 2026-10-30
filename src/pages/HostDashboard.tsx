@@ -41,6 +41,7 @@ export default function HostDashboard() {
         ...values,
         location: values.location || null,
         description: values.description || null,
+        hosted_by: values.hosted_by || null,
         slug: makeSlug(values.title),
       })
       .select()
@@ -130,7 +131,7 @@ function EventList({ events, faded }: { events: PartyEvent[]; faded?: boolean })
               <strong>{ev.title}</strong>
               <span className="muted">
                 {formatShortDate(ev.starts_at)}
-                {ev.location ? ` · ${ev.location}` : ''}  
+                {ev.location ? ` · ${ev.location}` : ''}
               </span>
             </span>
             {!ev.rsvp_open && <span className="pill">Closed</span>}
