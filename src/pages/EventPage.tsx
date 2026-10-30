@@ -1,11 +1,26 @@
-import { useCallback, useEffect, useState, type FormEvent, type ReactNode } from 'react';
-import { useParams } from 'react-router-dom';
-import { Diya, Lantern, Mandala, StringLights } from '../components/Decorations';
+import { useCallback, useEffect, useState, type FormEvent, type MouseEvent, type ReactNode } from 'react';
+import { Link, useParams } from 'react-router-dom';
+import { CornerOrnament, Curl, DIYAS, Diya, Flourish, GoldDefs, SideOrnament } from '../components/Decorations';
+import Sparkles from '../components/Sparkles';
 import { supabase } from '../lib/supabase';
 import type { MyRsvp, PartyEvent, PublicGuest, RsvpStatus } from '../lib/types';
 import { STATUS_EMOJI, STATUS_LABEL, dateParts, errorMessage, googleCalendarUrl, headcount } from '../lib/utils';
 
 const tokenKey = (eventId: string) => `pp:rsvp:${eventId}`;
+
+/** "14 Greenley Pl, Apt 2, Jamaica Plain, MA 02130" → ["14 Greenley Pl, Apt 2", "Jamaica Plain, MA 02130"] */
+function addressLines(location: string): string[] {
+  const parts = location.split(',').map((p) => p.trim()).filter(Boolean);
+  if (parts.length < 3) return [location];
+  const cut = Math.ceil(parts.length / 2);
+  return [parts.slice(0, cut).join(', '), parts.slice(cut).join(', ')];
+}
+
+// HashRouter uses the #, so scroll manually instead of following #rsvp
+function scrollToRsvp(e: MouseEvent) {
+  e.preventDefault();
+  document.getElementById('rsvp')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
 
 interface Props {
   /** Show a specific event instead of the one in the URL (used by the home page). */
@@ -126,58 +141,86 @@ export default function EventPage({ slug: slugProp, fallback }: Props) {
   return (
     <main className="page event-page">
       <section className="invite">
-        <StringLights />
-        <Lantern className="lantern-left" />
-        <Lantern className="lantern-right" />
+        <GoldDefs />
+        <div className="invite-bg" aria-hidden />
+        <Sparkles />
 
-        <p className="invite-kicker">You are invited to</p>
-        <h1 className="invite-title">
-          <span className="invite-title-main">{titleMain}</span>
-          {titleSub && <span className="invite-title-sub">{titleSub}</span>}
-        </h1>
+        <div className="orn orn-tl"><CornerOrnament /></div>
+        <div className="orn orn-tr"><CornerOrnament /></div>
+        <div className="orn orn-bl"><CornerOrnament /></div>
+        <div className="orn orn-br"><CornerOrnament /></div>
+        <div className="orn orn-side orn-l"><SideOrnament /></div>
+        <div className="orn orn-side orn-r"><SideOrnament /></div>
 
-        {paragraphs.map((p, i) => (
-          <p key={i} className="invite-desc">{p}</p>
-        ))}
+        <div className="invite-content">
+          <p className="invite-kicker reveal" style={{ ['--d' as string]: '0.5s' }}>You are Invited to</p>
+          <h1 className="invite-title reveal" style={{ ['--d' as string]: '0.8s' }}>
+            <span className="shine">{titleMain}</span>
+            {titleSub && <span className="shine">{titleSub}</span>}
+          </h1>
 
-        <div className="date-block">
-          <div className="date-month">{when.month}</div>
-          <div className="date-row">
-            <span className="date-side">{when.weekday}</span>
-            <span className="date-day">{when.day}</span>
-            <span className="date-side">at {when.time}</span>
+          {paragraphs.map((p, i) => (
+            <p key={i} className="invite-desc reveal" style={{ ['--d' as string]: `${1.3 + i * 0.15}s` }}>{p}</p>
+          ))}
+
+          <div className="date-block reveal" style={{ ['--d' as string]: '1.7s' }}>
+            <Flourish />
+            <div className="date-row">
+              <Curl />
+              <div className="date-text">
+                <div>{when.month} {when.weekday} {Number(when.day)}</div>
+                <div>at {when.time} ({when.year})</div>
+              </div>
+              <Curl flip />
+            </div>
+            <Flourish className="flip-y" />
+          </div>
+
+          {event.location && (
+            <a
+              className="invite-address reveal"
+              style={{ ['--d' as string]: '2s' }}
+              href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {addressLines(event.location).map((line) => (
+                <span key={line}>{line}</span>
+              ))}
+            </a>
+          )}
+
+          {badge && (
+            <div className="invite-badge reveal" style={{ ['--d' as string]: '2.3s' }}>
+              <Curl />
+              <span>{badge}</span>
+              <Curl flip />
+            </div>
+          )}
+
+          <div className="invite-actions reveal" style={{ ['--d' as string]: '2.6s' }}>
+            <a href="#rsvp" className="btn btn-primary" onClick={scrollToRsvp}>RSVP</a>
+            <a
+              className="btn btn-ghost"
+              href={googleCalendarUrl(event.title, event.starts_at, event.location, event.description)}
+              target="_blank"
+              rel="noreferrer"
+            >
+              Add to calendar
+            </a>
           </div>
         </div>
 
-        {event.location && (
-          <a
-            className="invite-address"
-            href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            {event.location}
-          </a>
-        )}
-
-        {badge && <div className="invite-badge">{badge}</div>}
-
-        <a
-          className="btn btn-ghost btn-sm calendar-btn"
-          href={googleCalendarUrl(event.title, event.starts_at, event.location, event.description)}
-          target="_blank"
-          rel="noreferrer"
-        >
-          Add to calendar
-        </a>
-
-        <div className="invite-floor">
-          <Mandala />
-          <Diya className="diya-main" />
+        <div className="diya-row" aria-hidden>
+          {DIYAS.map((d, i) => (
+            <div key={i} className="diya-slot" style={{ left: `${d.x}%`, bottom: `${d.y}px`, ['--s' as string]: d.s }}>
+              <Diya delay={0.2 + i * 0.12} />
+            </div>
+          ))}
         </div>
       </section>
 
-      <section className="card rsvp-card">
+      <section className="card rsvp-card" id="rsvp">
         {!event.rsvp_open && !submitted ? (
           <div className="empty">
             <h2>RSVPs are closed</h2>
@@ -269,6 +312,9 @@ export default function EventPage({ slug: slugProp, fallback }: Props) {
           )}
         </section>
       )}
+      <p className="host-link">
+        <Link to="/login">Host login</Link>
+      </p>
     </main>
   );
 }

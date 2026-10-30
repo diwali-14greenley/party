@@ -1,5 +1,5 @@
 import { useEffect, type ReactNode } from 'react';
-import { Link, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Link, Navigate, Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from './lib/auth';
 import { supabaseConfigured } from './lib/supabase';
 import { AFTER_LOGIN_KEY, APP_NAME, FEATURED_EVENT_SLUG } from './lib/utils';
@@ -34,6 +34,9 @@ function SetupNeeded() {
 export default function App() {
   const { session } = useAuth();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  // Invitation pages are full-screen; they have their own small host link at the bottom
+  const isInvite = pathname === '/' || pathname.startsWith('/e/');
 
   // After clicking the magic link, send the host straight to their dashboard
   useEffect(() => {
@@ -47,6 +50,7 @@ export default function App() {
 
   return (
     <div className="app">
+      {!isInvite && (
       <header className="topbar">
         <Link to="/" className="brand">
           <span aria-hidden>🪔</span> {APP_NAME}
@@ -59,6 +63,7 @@ export default function App() {
           )}
         </nav>
       </header>
+      )}
 
       <Routes>
         {/* Home shows the featured party; falls back to the landing page if it doesn't exist yet */}

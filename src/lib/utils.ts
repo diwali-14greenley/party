@@ -12,7 +12,7 @@ export function dateParts(iso: string) {
     day: String(d.getDate()).padStart(2, '0'),
     month: d.toLocaleDateString(undefined, { month: 'long' }),
     year: d.getFullYear(),
-    time: d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }),
+    time: d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }),
   };
 }
 
