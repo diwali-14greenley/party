@@ -717,3 +717,13 @@ textarea { resize: vertical; }
     animation: none !important;
   }
 }
+
+.email-sent {
+  font-size: 0.9rem;
+  color: var(--gold-light);
+  background: var(--accent-soft);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 0.9rem;
+  display: inline-block;
+}

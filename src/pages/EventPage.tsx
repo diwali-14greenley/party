@@ -46,6 +46,7 @@ export default function EventPage({ slug: slugProp, fallback }: Props) {
   const [editingExisting, setEditingExisting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [busy, setBusy] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const loadGuests = useCallback(async (eventId: string) => {
@@ -109,6 +110,15 @@ export default function EventPage({ slug: slugProp, fallback }: Props) {
     setSubmitted(true);
     setEditingExisting(false);
     loadGuests(event.id);
+
+    // Email a confirmation (runs in the background; the RSVP is already saved either way)
+    setEmailSent(false);
+    supabase.functions
+      .invoke('rsvp-confirmation', { body: { event_id: event.id, edit_token: newToken } })
+      .then(({ data: res, error: fnErr }) => {
+        if (fnErr) console.warn('Confirmation email failed:', fnErr);
+        else if ((res as { sent?: boolean } | null)?.sent) setEmailSent(true);
+      });
   }
 
   if (loading) return <p className="center-note">Loading…</p>;
@@ -281,6 +291,9 @@ export default function EventPage({ slug: slugProp, fallback }: Props) {
               You answered <strong>{STATUS_LABEL[status]}</strong>
               {status !== 'declined' && plusOnes > 0 ? ` with +${plusOnes}` : ''}.
             </p>
+            {emailSent && (
+              <p className="email-sent">📧 A confirmation is on its way to <strong>{email}</strong></p>
+            )}
             {event.rsvp_open && (
               <button className="btn btn-ghost" onClick={() => setEditingExisting(true)}>Change my RSVP</button>
             )}
