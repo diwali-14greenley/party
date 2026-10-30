@@ -2,12 +2,14 @@ import { useState, type FormEvent } from 'react';
 import { Navigate } from 'react-router-dom';
 import { useAuth } from '../lib/auth';
 import { supabase } from '../lib/supabase';
-import { AFTER_LOGIN_KEY, errorMessage } from '../lib/utils';
+import { errorMessage } from '../lib/utils';
 
+// Hosts sign in with an email + password that the organizer creates in
+// Supabase → Authentication → Users. No emails are sent.
 export default function Login() {
   const { session } = useAuth();
   const [email, setEmail] = useState('');
-  const [sent, setSent] = useState(false);
+  const [password, setPassword] = useState('');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -17,51 +19,53 @@ export default function Login() {
     e.preventDefault();
     setBusy(true);
     setError(null);
-    localStorage.setItem(AFTER_LOGIN_KEY, '1');
-    const { error } = await supabase.auth.signInWithOtp({
+    const { error } = await supabase.auth.signInWithPassword({
       email: email.trim(),
-      options: { emailRedirectTo: window.location.origin + import.meta.env.BASE_URL },
+      password,
     });
     setBusy(false);
-    if (error) setError(errorMessage(error));
-    else setSent(true);
+    if (error) {
+      setError(
+        error.message === 'Invalid login credentials'
+          ? 'Wrong email or password.'
+          : errorMessage(error),
+      );
+    }
+    // On success the session updates and <Navigate> above sends you to /host.
   }
 
   return (
     <main className="page narrow">
       <div className="card">
-        {sent ? (
-          <>
-            <h1>Check your inbox 📬</h1>
-            <p>
-              We sent a login link to <strong>{email}</strong>. Open it in this browser and you'll land on your
-              dashboard.
-            </p>
-            <button className="btn btn-ghost" onClick={() => setSent(false)}>Use a different email</button>
-          </>
-        ) : (
-          <>
-            <h1>Host login</h1>
-            <p className="muted">No password. We'll email you a one-time link.</p>
-            <form onSubmit={handleSubmit} className="stack">
-              <label className="field">
-                <span>Email</span>
-                <input
-                  type="email"
-                  required
-                  autoComplete="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="you@example.com"
-                />
-              </label>
-              {error && <p className="error">{error}</p>}
-              <button className="btn btn-primary" disabled={busy}>
-                {busy ? 'Sending…' : 'Send me a login link'}
-              </button>
-            </form>
-          </>
-        )}
+        <h1>Host login</h1>
+        <p className="muted">For hosts and co-hosts only.</p>
+        <form onSubmit={handleSubmit} className="stack">
+          <label className="field">
+            <span>Email</span>
+            <input
+              type="email"
+              required
+              autoComplete="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+            />
+          </label>
+          <label className="field">
+            <span>Password</span>
+            <input
+              type="password"
+              required
+              autoComplete="current-password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </label>
+          {error && <p className="error">{error}</p>}
+          <button className="btn btn-primary" disabled={busy}>
+            {busy ? 'Signing in…' : 'Sign in'}
+          </button>
+        </form>
       </div>
     </main>
   );
